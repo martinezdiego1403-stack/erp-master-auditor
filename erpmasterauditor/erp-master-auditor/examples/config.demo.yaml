@@ -1,0 +1,21 @@
+erp:
+  command: ["python3", "-u", "examples/fake_erp.py"]
+  cwd: "."
+  backend: pipe
+  encoding: utf-8
+  quiet_ms: 250
+  max_wait_ms: 4000
+  ready_pattern: "Opcion: $"
+reset:
+  command: null
+database:
+  enabled: false
+source:
+  root: "."
+limits:
+  max_inputs_per_mission: 50
+  max_session_seconds: 300
+blocked_input_patterns:
+  - "(?i)drop\\s+table"
+agent:
+  use_claude_code_preset: true

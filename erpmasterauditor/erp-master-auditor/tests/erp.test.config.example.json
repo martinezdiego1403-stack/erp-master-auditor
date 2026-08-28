@@ -1,0 +1,14 @@
+{
+  "Command": "pwsh",
+  "Arguments": ["-NoLogo", "-NoProfile", "-File", "C:\\ERP\\ERP.ps1"],
+  "WorkingDirectory": "C:\\ERP",
+  "Encoding": "utf-8",
+  "QuietMs": 400,
+  "MaxWaitMs": 8000,
+  "ReadyPattern": null,
+  "Environment": {
+    "ERP_ENV": "test"
+  },
+  "ResetCommand": "pwsh",
+  "ResetArguments": ["-NoLogo", "-NoProfile", "-File", "C:\\ERP\\tools\\Reset-TestDb.ps1"]
+}

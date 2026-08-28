@@ -1,0 +1,14 @@
+claude-agent-sdk>=0.1.0
+PyYAML>=6.0
+
+# --- Opcionales (instalar segun tu caso) ---
+# Backend ConPTY: obligatorio si tu ERP usa Console.ReadKey / colores / redibujado
+# pywinpty>=2.0 ; sys_platform == "win32"
+#
+# Render de pantalla virtual (erp_screen) cuando usas el backend pty
+# pyte>=0.8
+#
+# Acceso de solo lectura a la base de datos (elegi el driver que corresponda)
+# pyodbc>=5.0          # SQL Server
+# psycopg[binary]>=3.1 # PostgreSQL
+# (SQLite ya viene en la stdlib)

@@ -1,0 +1,80 @@
+# ============================================================
+#  ERP MASTER AUDITOR - configuracion
+#  Copiar a config.yaml y ajustar. config.yaml NO se versiona.
+# ============================================================
+
+erp:
+  # Como se lanza tu ERP. Ejemplos:
+  #   Script PowerShell:  ["pwsh", "-NoLogo", "-NoProfile", "-File", "C:\\ERP\\ERP.ps1"]
+  #   Ejecutable .NET:    ["C:\\ERP\\bin\\Release\\net8.0\\ERP.exe"]
+  #   dotnet run:         ["dotnet", "C:\\ERP\\bin\\Release\\net8.0\\ERP.dll"]
+  command: ["pwsh", "-NoLogo", "-NoProfile", "-File", "C:\\ERP\\ERP.ps1"]
+  cwd: "C:\\ERP"
+
+  # pipe -> subprocess con stdin/stdout redirigidos (simple, rapido).
+  #         Sirve si el ERP lee con Read-Host / Console.ReadLine().
+  # pty  -> ConPTY via pywinpty (consola real emulada).
+  #         Necesario si el ERP usa Console.ReadKey(), colores, o redibuja la pantalla.
+  backend: pipe
+
+  # Encoding de la consola. En Windows con acentos suele ser utf-8 si el ERP
+  # hace [Console]::OutputEncoding = [Text.Encoding]::UTF8 al arrancar.
+  # Si ves caracteres rotos, probar: cp850, cp1252, utf-8
+  encoding: utf-8
+
+  # Variables de entorno extra que recibe el ERP (usalas para forzar ambiente de test)
+  env:
+    ERP_ENV: "test"
+    ERP_NONINTERACTIVE_SAFE: "1"
+
+  # Heuristica de lectura: se considera que el ERP "termino de escribir"
+  # cuando pasan quiet_ms sin datos nuevos, o se agota max_wait_ms.
+  quiet_ms: 400
+  max_wait_ms: 8000
+
+  # Regex opcional del prompt del ERP. Si aparece, se corta la lectura
+  # inmediatamente sin esperar el quiet period (mucho mas rapido).
+  # Ejemplo para un menu que termina en "Opcion: "
+  ready_pattern: null
+
+  # Solo backend pty
+  rows: 40
+  cols: 140
+
+# Comando que deja la base en un estado conocido antes de cada mision.
+# Se ejecuta con erp_start(reset_db=true). Dejar en null para desactivar.
+reset:
+  command: ["pwsh", "-NoLogo", "-NoProfile", "-File", "C:\\ERP\\tools\\Reset-TestDb.ps1"]
+  timeout_seconds: 180
+
+# Acceso de SOLO LECTURA a la base. Permite al auditor verificar que lo que
+# la consola dice que paso, realmente paso en los datos (seccion 13 y 19).
+database:
+  enabled: false
+  kind: sqlserver          # sqlserver | postgres | sqlite
+  connection_string: "Driver={ODBC Driver 18 for SQL Server};Server=localhost;Database=ERP_TEST;Trusted_Connection=yes;TrustServerCertificate=yes;"
+  max_rows: 200
+
+# Codigo fuente del ERP, para CODE AUDIT MODE (secciones 5, 6 y 22).
+source:
+  root: "C:\\ERP"
+  enable_bash: false       # true = el auditor puede correr comandos (dotnet build, git log...)
+
+limits:
+  max_inputs_per_mission: 250
+  max_session_seconds: 1200
+  max_turns: 200
+
+# Guardas de seguridad: inputs que el auditor NUNCA puede enviar al ERP.
+# Aunque el ERP corra contra base de test, esto evita accidentes.
+blocked_input_patterns:
+  - "(?i)drop\\s+(database|table)"
+  - "(?i)truncate\\s+table"
+  - "(?i)format\\s+[a-z]:"
+  - "(?i)shutdown"
+  - "(?i)rm\\s+-rf"
+
+agent:
+  model: null                    # null = default del SDK. Ej: "claude-opus-4-6"
+  use_claude_code_preset: true   # true = charter como append al preset (recomendado)
+  permission_mode: "bypassPermissions"   # necesario para correr desatendido
